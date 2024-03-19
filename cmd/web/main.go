@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/timfewi/bookingsGo/pkg/config"
-	"github.com/timfewi/bookingsGo/pkg/handlers"
-	"github.com/timfewi/bookingsGo/pkg/render"
+	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/handlers"
+	"github.com/timfewi/bookingsGo/internal/render"
 )
 
 const portNumber = ":7070"

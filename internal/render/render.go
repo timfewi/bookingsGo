@@ -2,13 +2,15 @@ package render
 
 import (
 	"bytes"
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 
-	"github.com/timfewi/bookingsGo/pkg/config"
-	"github.com/timfewi/bookingsGo/pkg/models"
+	"github.com/justinas/nosurf"
+	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/models"
 )
 
 var functions = template.FuncMap{}
@@ -20,13 +22,13 @@ func NewTemplates(a *config.AppConfig) {
 }
 
 // AddDefaultData adds data for all templates
-func AddDefaultData(td *models.TemplateData) *models.TemplateData {
-	
+func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
+	td.CSRFToken = nosurf.Token(r)
 	return td
 }
 
 // Template renders templates using html/template
-func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
 
 	var tc map[string]*template.Template
 	if app.UseCache {
@@ -46,8 +48,8 @@ func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 
 	buf := new(bytes.Buffer)
 
-	td = AddDefaultData(td)
-	
+	td = AddDefaultData(td, r)
+
 	_ = t.Execute(buf, td)
 
 	// render the template
@@ -56,6 +58,22 @@ func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 		log.Fatal(err)
 	}
 
+}
+
+// JSON converts a struct to a formated json
+func JSON(w http.ResponseWriter, r *http.Request, data interface{}) error {
+	js, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(js)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
 }
 
 // CreateTemplateCache creates a template cache as a map

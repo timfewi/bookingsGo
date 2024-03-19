@@ -65,15 +65,49 @@
                         <div class="col">
                             <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
                         </div>
-
+                      
                     </div>
                 </div>
             </div>
         </form>
         `;
         attention.custom({
-            title: 'Choose your dates',
             msg: html,
+            title: 'Choose your dates',
+            willOpen: () => {
+                        const elem = document.getElementById("reservation-dates-modal");
+                        const rp = new DateRangePicker(elem, {
+                            format: 'yyyy-mm-dd',
+                            showOnFocus: true,
+                        })
+                    },
+            didOpen: () => {
+                document.getElementById("start").removeAttribute("disabled");
+                document.getElementById("end").removeAttribute("disabled");
+            },
+            callback: function(result) {
+                console.log(result);
+
+                let form = document.getElementById('check-availability-form');
+                let formData = new FormData(form);
+                formData.append("csrf_token", "{{.CSRFToken}}");
+
+
+                fetch('/search-availability-json', {
+                    method: 'post',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            }
         });
     })
 </script>
