@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/forms"
 	"github.com/timfewi/bookingsGo/internal/models"
 	"github.com/timfewi/bookingsGo/internal/render"
 )
@@ -53,7 +55,51 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 
 // Reservation renders the make a reservation page and displays form
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{})
+	var emptyReservation models.Reservation
+	data := make(map[string]interface{})
+	data["reservation"] = emptyReservation
+
+	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+		Data: data,
+	})
+
+}
+
+// PostReservation handles the posting of reservation form
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	reservation := models.Reservation{
+		FirstName: r.Form.Get("first_name"),
+		LastName:  r.Form.Get("last_name"),
+		Email:     r.Form.Get("email"),
+		Phone:     r.Form.Get("phone"),
+	}
+
+	forms := forms.New(r.PostForm)
+
+	forms.Required("first_name", "last_name", "email")
+	forms.MinLength("first_name", 3, r)
+	
+	if !forms.Valid() {
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+
+		render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+			Form: forms,
+			Data: data,
+		})
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "reservation", reservation)
+	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
+
 }
 
 // Generals renders the room page
