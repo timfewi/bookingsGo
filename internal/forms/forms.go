@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // Form creates a custom form struct, embeds a url.Values object
@@ -24,7 +26,7 @@ func New(data url.Values) *Form {
 func (f *Form) Has(field string, r *http.Request) bool {
 	x := r.Form.Get(field)
 	if x == "" {
-		f.Errors.Add(field, "This field cannot be blank")
+
 		return false
 	}
 	return true
@@ -45,7 +47,6 @@ func (f *Form) Valid() bool {
 	return len(f.Errors) == 0
 }
 
-
 // MinLength checks for string minimum length
 func (f *Form) MinLength(field string, length int, r *http.Request) bool {
 	x := r.Form.Get(field)
@@ -54,4 +55,13 @@ func (f *Form) MinLength(field string, length int, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+
+// IsEmail checks for valid email
+func (f *Form) IsEmail(field string)  {
+	v := validator.New()
+	err := v.Var(f.Get(field), "email")
+	if err != nil {
+		f.Errors.Add(field, "Invalid email address")
+	}
 }
