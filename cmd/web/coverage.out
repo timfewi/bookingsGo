@@ -1,0 +1,13 @@
+mode: set
+github.com/timfewi/bookingsGo/cmd/web/main.go:22.13,24.16 2 0
+github.com/timfewi/bookingsGo/cmd/web/main.go:24.16,26.3 1 0
+github.com/timfewi/bookingsGo/cmd/web/main.go:28.2,36.16 4 0
+github.com/timfewi/bookingsGo/cmd/web/main.go:36.16,38.3 1 0
+github.com/timfewi/bookingsGo/cmd/web/main.go:41.18,58.16 10 1
+github.com/timfewi/bookingsGo/cmd/web/main.go:58.16,61.3 2 0
+github.com/timfewi/bookingsGo/cmd/web/main.go:63.2,71.12 6 1
+github.com/timfewi/bookingsGo/cmd/web/middleware.go:11.53,12.71 1 1
+github.com/timfewi/bookingsGo/cmd/web/middleware.go:12.71,15.3 2 1
+github.com/timfewi/bookingsGo/cmd/web/middleware.go:19.45,30.2 3 1
+github.com/timfewi/bookingsGo/cmd/web/middleware.go:33.50,35.2 1 1
+github.com/timfewi/bookingsGo/cmd/web/routes.go:12.49,39.2 20 1
