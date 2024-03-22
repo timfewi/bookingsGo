@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"log"
+	"errors"
 	"net/http"
 
 	"github.com/timfewi/bookingsGo/internal/config"
 	"github.com/timfewi/bookingsGo/internal/forms"
+	"github.com/timfewi/bookingsGo/internal/helpers"
 	"github.com/timfewi/bookingsGo/internal/models"
 	"github.com/timfewi/bookingsGo/internal/render"
 )
@@ -33,24 +34,12 @@ func NewHandlers(r *Repository) {
 
 // Home is a function that returns the home page
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-
-	remoteIP := r.RemoteAddr
-	m.App.Session.Put(r.Context(), "remote_ip", remoteIP)
-
 	render.Template(w, r, "home.page.tmpl", &models.TemplateData{})
 }
 
 // About is a function that returns the about page
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	StringMap := make(map[string]string)
-	StringMap["test"] = "Hello, again."
-
-	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
-
-	StringMap["remote_ip"] = remoteIP
-	render.Template(w, r, "about.page.tmpl", &models.TemplateData{
-		StringMap: StringMap,
-	})
+	render.Template(w, r, "about.page.tmpl", &models.TemplateData{})
 }
 
 // Reservation renders the make a reservation page and displays form
@@ -70,7 +59,7 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err)
+		helpers.ServerError(w, err)
 		return
 	}
 
@@ -149,7 +138,7 @@ func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) {
 	reservation, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 	if !ok {
-		log.Println("Cannot get item from session")
+		helpers.ServerError(w, errors.New("Cannot get reservation from session"))
 		m.App.Session.Put(r.Context(), "error", "Cannot get reservation from session")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
@@ -162,7 +151,6 @@ func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) 
 
 	render.Template(w, r, "reservation-summary.page.tmpl", &models.TemplateData{
 		Data: data,
-
 	})
 
 }

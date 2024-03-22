@@ -30,6 +30,13 @@ func getRoutes() http.Handler {
 	// change this to true when in production
 	app.InProduction = false
 
+	infoLog := log.New(log.Writer(), "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = infoLog
+
+	errorLog := log.New(log.Writer(), "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	app.ErrorLog = errorLog
+
+
 	// session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
@@ -41,7 +48,7 @@ func getRoutes() http.Handler {
 
 	tc, err := CreateTestTemplateCache()
 	if err != nil {
-		log.Fatal("Cannot create template cache")
+		log.Fatal("cannot create template cache")
 
 	}
 

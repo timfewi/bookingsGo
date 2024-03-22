@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/timfewi/bookingsGo/internal/config"
 	"github.com/timfewi/bookingsGo/internal/handlers"
+	"github.com/timfewi/bookingsGo/internal/helpers"
 	"github.com/timfewi/bookingsGo/internal/models"
 	"github.com/timfewi/bookingsGo/internal/render"
 )
@@ -18,6 +20,8 @@ const portNumber = ":7070"
 
 var app config.AppConfig
 var session *scs.SessionManager
+var infoLog *log.Logger
+var errorLog *log.Logger
 
 func main() {
 	err := run()
@@ -45,6 +49,14 @@ func run() error {
 	// change this to true when in production
 	app.InProduction = false
 
+	// create info logger
+	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	app.InfoLog = infoLog
+
+	// create error logger
+	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	app.ErrorLog = errorLog
+
 	// session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
@@ -67,6 +79,7 @@ func run() error {
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
 	render.NewTemplates(&app)
+	helpers.NewHelpers(&app)
 
 	return nil
 }

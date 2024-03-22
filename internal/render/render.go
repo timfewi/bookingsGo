@@ -12,6 +12,7 @@ import (
 
 	"github.com/justinas/nosurf"
 	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/helpers"
 	"github.com/timfewi/bookingsGo/internal/models"
 )
 
@@ -72,13 +73,13 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 func JSON(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	js, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
-		log.Fatal(err)
+		helpers.ServerError(w, err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(js)
 	if err != nil {
-		log.Fatal(err)
+		helpers.ServerError(w, err)
 	}
 
 	return nil
