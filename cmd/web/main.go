@@ -10,6 +10,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/driver"
 	"github.com/timfewi/bookingsGo/internal/handlers"
 	"github.com/timfewi/bookingsGo/internal/helpers"
 	"github.com/timfewi/bookingsGo/internal/models"
@@ -24,10 +25,11 @@ var infoLog *log.Logger
 var errorLog *log.Logger
 
 func main() {
-	err := run()
+	db, err := run()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.SQL.Close()
 
 	fmt.Println(fmt.Sprintf("Starting application on port %s", portNumber))
 
@@ -42,7 +44,7 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (*driver.DB, error) {
 
 	gob.Register(models.Reservation{})
 
@@ -66,20 +68,27 @@ func run() error {
 
 	app.Session = session
 
+	// connect to database
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookingsGo user=postgres password=1683 sslmode=disable")
+	if err != nil {
+		log.Fatal("Cannot connect to database! Dying...")
+	}
+	defer db.SQL.Close()
+
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("Cannot create template cache")
-		return err
+		return nil, err
 	}
 
 	app.TemplateCache = tc
 	// false means we are in development mode
 	app.UseCache = false
 
-	repo := handlers.NewRepo(&app)
+	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
 	render.NewTemplates(&app)
 	helpers.NewHelpers(&app)
 
-	return nil
+	return db, nil
 }

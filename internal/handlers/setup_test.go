@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/justinas/nosurf"
 	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/driver"
 	"github.com/timfewi/bookingsGo/internal/models"
 	"github.com/timfewi/bookingsGo/internal/render"
 )
@@ -36,7 +37,6 @@ func getRoutes() http.Handler {
 	errorLog := log.New(log.Writer(), "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	app.ErrorLog = errorLog
 
-
 	// session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
@@ -45,6 +45,14 @@ func getRoutes() http.Handler {
 	session.Cookie.Secure = app.InProduction
 
 	app.Session = session
+
+	// connect to database
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookingsGo user=postgres password=postgres sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.SQL.Close()
 
 	tc, err := CreateTestTemplateCache()
 	if err != nil {
@@ -56,7 +64,7 @@ func getRoutes() http.Handler {
 
 	app.UseCache = true
 
-	repo := NewRepo(&app)
+	repo := NewRepo(&app, db)
 	NewHandlers(repo)
 	render.NewTemplates(&app)
 

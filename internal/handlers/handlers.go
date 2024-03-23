@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"github.com/timfewi/bookingsGo/internal/config"
+	"github.com/timfewi/bookingsGo/internal/driver"
 	"github.com/timfewi/bookingsGo/internal/forms"
 	"github.com/timfewi/bookingsGo/internal/helpers"
 	"github.com/timfewi/bookingsGo/internal/models"
 	"github.com/timfewi/bookingsGo/internal/render"
+	"github.com/timfewi/bookingsGo/internal/repository"
+	"github.com/timfewi/bookingsGo/internal/repository/dbrepo"
 )
 
 // Repo the repository used by the handlers
@@ -17,12 +20,14 @@ var Repo *Repository
 // Repository is the repository type
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 // NewRepo creates a new repository
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 
