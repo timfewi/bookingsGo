@@ -2,3 +2,5 @@ drop_table("room_restrictions")
 drop_table("reservations")
 drop_table("rooms")
 drop_table("users")
+
+drop_foreign_key("reservations", "reservations_rooms_id_fk", {})
